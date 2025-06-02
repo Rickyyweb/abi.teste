@@ -19,13 +19,7 @@ Este README descreve como executar a aplicação via Docker, bem como boas prát
    - [4. Verificar Logs e Testar Endpoints](#4-verificar-logs-e-testar-endpoints)  
 4. [Git Flow](#git-flow)  
    - [Branches Principais](#branches-principais)  
-   - [Fluxo de Desenvolvimento](#fluxo-de-desenvolvimento)  
-   - [Mesclagem e Releases](#mesclagem-e-releases)  
-5. [Commit Semântico](#commit-semântico)  
-   - [Formato Básico](#formato-básico)  
-   - [Tipos de Commits](#tipos-de-commits)  
-   - [Exemplos de Mensagens](#exemplos-de-mensagens)  
-6. [Boas Práticas Gerais](#boas-práticas-gerais)  
+5. [Boas Práticas Gerais](#boas-práticas-gerais)  
 
 ---
 
@@ -41,11 +35,57 @@ Antes de executar a aplicação via Docker, verifique se você possui instalado 
 
 ## Estrutura do Projeto
 
+```
+Ambev.DeveloperEvaluation
+├── Adapters
+│   └── Driven
+│       └── Infrastructure
+│           └── Ambev.DeveloperEvaluation.ORM
+├── Drivers
+│   └── WebApi
+│       └── Ambev.DeveloperEvaluation.WebApi
+├── Core
+│   ├── Application
+│   │   └── Ambev.DeveloperEvaluation.Application
+│   └── Domain
+│       └── Ambev.DeveloperEvaluation.Domain
+├── Crosscutting
+│   ├── Common
+│   │   └── Ambev.DeveloperEvaluation.Common
+│   └── IoC
+│       └── Ambev.DeveloperEvaluation.IoC
+├── Solution Items
+│   └── (arquivos adicionais da solução)
+├── Tests
+│   ├── Functional
+│   │   └── Ambev.DeveloperEvaluation.Functional
+│   │       ├── Dependências
+│   │       ├── CustomWebApplicationFactory
+│   │       ├── Helper
+│   │       │   ├── ProjectPathHelper
+│   │       │   └── ProgramStub.cs
+│   │       ├── Products
+│   │       │   └── ProductsApiTests.cs
+│   │       └── Sales
+│   ├── Integration
+│   │   └── Ambev.DeveloperEvaluation.Integration
+│   └── Unit
+│       └── Ambev.DeveloperEvaluation.Unit
+├── docker-compose.yml
+└── README.md
+```
 
-- **docker-compose.yml**: Orquestra os containers da aplicação web (.NET) e do banco de dados (PostgreSQL).  
-- **src/Ambev.DeveloperEvaluation.WebApi/Dockerfile**: Define como a imagem Docker da aplicação será construída.  
-- **src/Ambev.DeveloperEvaluation.WebApi**: Código‐fonte da Web API (controllers, serviços, repositórios, etc.).  
-- **tests/**: Testes unitários e de integração, organizados por pastas.
+- **Adapters/Driven/Infrastructure/Ambev.DeveloperEvaluation.ORM**: Projeto de persistência usando Entity Framework Core (PostgreSQL).  
+- **Drivers/WebApi/Ambev.DeveloperEvaluation.WebApi**: Projeto ASP.NET Core Web API (controllers, endpoints etc.).  
+- **Core/Application/Ambev.DeveloperEvaluation.Application**: Contém comandos, handlers e regras de aplicação.  
+- **Core/Domain/Ambev.DeveloperEvaluation.Domain**: Entidades de domínio, especificações e validações.  
+- **Crosscutting/Common/Ambev.DeveloperEvaluation.Common**: Componentes comuns e utilitários compartilhados.  
+- **Crosscutting/IoC/Ambev.DeveloperEvaluation.IoC**: Configuração de Injeção de Dependências.  
+- **Tests/Functional**: Testes funcionais (WebApplicationFactory), incluindo helper ProgramStub e ProjectPathHelper.  
+- **Tests/Integration**: Testes de integração (Testcontainers).  
+- **Tests/Unit**: Testes unitários (xUnit + FluentAssertions).  
+- **docker-compose.yml**: Orquestra a execução da WebAPI e do container PostgreSQL.  
+- **README.md**: Documentação deste projeto (este arquivo).
 
 ---
 
