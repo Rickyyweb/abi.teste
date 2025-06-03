@@ -31,7 +31,6 @@ namespace Ambev.DeveloperEvaluation.Application.Services
             message.To.Add(MailboxAddress.Parse(to));
             message.Subject = subject;
 
-            // Vamos mandar texto simples; se quiser HTML, use TextFormat.Html
             message.Body = new TextPart("plain")
             {
                 Text = body

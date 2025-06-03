@@ -153,6 +153,10 @@ webapi    |       Application started. Press Ctrl+C to shut down.
 database  | 2023-XX-XX 12:00:00.000 UTC [1] LOG:  database system is ready to accept connections
 ```
 
+```
+
+```
+
 ### 4. Verificar Logs e Testar Endpoints
 
 1. **Logs**:  
@@ -161,42 +165,86 @@ database  | 2023-XX-XX 12:00:00.000 UTC [1] LOG:  database system is ready to ac
 
 2. **Testar Endpoints** (via `curl`, `Postman` ou browser):
 
-   - **Criar Produto** (POST):
+   - **Criar Venda** (POST):
      ```bash
-     curl -X POST http://localhost:8080/api/Products \
-       -H "Content-Type: application/json" \
-       -d '{"name":"Produto X","price":25.5}'
-     ```
-     Exemplo de resposta (HTTP 201):
-     ```json
-     {
-       "data": {
-         "id": "550e8400-e29b-41d4-a716-446655440000",
-         "name": "Produto X",
-         "price": 25.5
-       },
-       "success": true,
-       "message": "Produto criado com sucesso",
-       "errors": []
-     }
+		 curl -X 'POST' \
+		  'http://localhost:8080/api/Sales' \
+		  -H 'accept: text/plain' \
+		  -H 'Content-Type: application/json' \
+		  -d '{
+		  "idempotencyKey": "abc123-qualquer-coisa",
+		  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+		  "items": [
+			{
+			  "productId": "6f1e4f02-1a35-4b2d-9fdd-3a7c5ab1ae2b",
+			  "quantity": 13
+			},
+			{
+			  "productId": "b254a3d4-7c76-4e14-af08-2dcf928d3b10",
+			  "quantity": 2
+			}
+		  ]
+		}'
      ```
 
-   - **Obter Produto** (GET):
+   - **Obter Venda** (GET):
      ```bash
-     curl http://localhost:8080/api/Products/550e8400-e29b-41d4-a716-446655440000
+     curl http://localhost:8080/api/Sales/1c107255-2f1d-45ee-975e-433a1db0f441
      ```
      Exemplo de resposta (HTTP 200):
      ```json
      {
-       "data": {
-         "id": "550e8400-e29b-41d4-a716-446655440000",
-         "name": "Produto X",
-         "price": 25.5
-       },
-       "success": true,
-       "message": "Produto recuperado com sucesso",
-       "errors": []
-     }
+		  "success": true,
+		  "message": "string",
+		  "errors": [
+			{
+			  "error": "string",
+			  "detail": "string"
+			}
+		  ],
+		  "data": {
+			"id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+			"subtotal": 0,
+			"discount": 0,
+			"totalAmount": 0,
+			"items": [
+			  {
+				"productId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+				"productName": "string",
+				"productPrice": 0,
+				"quantity": 0,
+				"unitPrice": 0,
+				"totalPrice": 0
+			  }
+			]
+		  }
+	  }
+     ```
+	 
+	 - **Atualizar Venda** (PUT):
+     ```bash
+		 curl -X 'PUT' \
+		  'http://localhost:8080/api/Sales/1c107255-2f1d-45ee-975e-433a1db0f441' \
+		  -H 'accept: text/plain' \
+		  -H 'Content-Type: application/json' \
+		  -d '{
+		  "idempotencyKey": "dwd2312",
+		  "items": [
+			{
+			  "productId": "b254a3d4-7c76-4e14-af08-2dcf928d3b10",
+			  "quantity": 20
+			},
+			{
+			  "productId": "6f1e4f02-1a35-4b2d-9fdd-3a7c5ab1ae2b",
+			  "quantity": 10
+			}
+		  ]
+		}'
+     ```
+	 
+	 - **Deletar Venda** (DELETE):
+     ```bash
+		 curl http://localhost:8080/api/Sales/1c107255-2f1d-45ee-975e-433a1db0f441
      ```
 
 3. **Encerrar os Containers**:
