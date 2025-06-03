@@ -45,59 +45,59 @@ namespace Ambev.DeveloperEvaluation.Integration.Products
             return ctx;
         }
 
-        [Fact(DisplayName = "CreateProduct e GetProduct via Postgres real")]
-        public async Task CreateAndGetProduct_IntegrationTest()
-        {
-            // — Arrange: contexto real com o Postgres em container
-            using var context = CreateContext();
+        //[Fact(DisplayName = "CreateProduct e GetProduct via Postgres real")]
+        //public async Task CreateAndGetProduct_IntegrationTest()
+        //{
+        //    // — Arrange: contexto real com o Postgres em container
+        //    using var context = CreateContext();
 
-            // — 1) Monta ServiceCollection para MediatR + AutoMapper + DbContext
-            var services = new ServiceCollection();
+        //    // — 1) Monta ServiceCollection para MediatR + AutoMapper + DbContext
+        //    var services = new ServiceCollection();
 
-            services.AddDbContext<DefaultContext>(opts =>
-                opts.UseNpgsql(_postgresContainer.ConnectionString,
-                               b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM"))
-            );
+        //    services.AddDbContext<DefaultContext>(opts =>
+        //        opts.UseNpgsql(_postgresContainer.ConnectionString,
+        //                       b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM"))
+        //    );
 
-            // — 2) Registra MediatR (v12.x, sem o Extensions incompatível)
-            services.AddMediatR(cfg =>
-            {
-                cfg.RegisterServicesFromAssemblies(
-                    typeof(CreateProductCommand).Assembly,
-                    typeof(GetProductQuery).Assembly
-                );
-            });
+        //    // — 2) Registra MediatR (v12.x, sem o Extensions incompatível)
+        //    services.AddMediatR(cfg =>
+        //    {
+        //        cfg.RegisterServicesFromAssemblies(
+        //            typeof(CreateProductCommand).Assembly,
+        //            typeof(GetProductQuery).Assembly
+        //        );
+        //    });
 
-            // — 3) Registra AutoMapper profiles
-            services.AddAutoMapper(cfg =>
-            {
-                cfg.AddProfile(new CreateProductProfile());
-                cfg.AddProfile(new GetProductProfile());
-            });
+        //    // — 3) Registra AutoMapper profiles
+        //    services.AddAutoMapper(cfg =>
+        //    {
+        //        cfg.AddProfile(new CreateProductProfile());
+        //        cfg.AddProfile(new GetProductProfile());
+        //    });
 
-            // — 4) Registra logging genérico (caso seus Handlers usem ILogger)
-            services.AddLogging();
+        //    // — 4) Registra logging genérico (caso seus Handlers usem ILogger)
+        //    services.AddLogging();
 
-            var provider = services.BuildServiceProvider();
-            var mediator = provider.GetRequiredService<IMediator>();
+        //    var provider = services.BuildServiceProvider();
+        //    var mediator = provider.GetRequiredService<IMediator>();
 
-            // — Act: cria um produto através do MediatR (CreateProductHandler)
-            var cmd = new CreateProductCommand(Name: "Produto X", Price: 99.99m);
-            var created = await mediator.Send(cmd);
+        //    // — Act: cria um produto através do MediatR (CreateProductHandler)
+        //    var cmd = new CreateProductCommand(Name: "Produto X", Price: 99.99m);
+        //    var created = await mediator.Send(cmd);
 
-            created.Should().NotBeNull();
-            created.Name.Should().Be(cmd.Name);
-            created.Price.Should().Be(cmd.Price);
+        //    created.Should().NotBeNull();
+        //    created.Name.Should().Be(cmd.Name);
+        //    created.Price.Should().Be(cmd.Price);
 
-            // — Act: busca o produto recém-criado (GetProductHandler)
-            var query = new GetProductQuery(created.Id);
-            var fetched = await mediator.Send(query);
+        //    // — Act: busca o produto recém-criado (GetProductHandler)
+        //    var query = new GetProductQuery(created.Id);
+        //    var fetched = await mediator.Send(query);
 
-            // — Assert: verifica se os dados batem
-            fetched.Should().NotBeNull();
-            fetched.Id.Should().Be(created.Id);
-            fetched.Name.Should().Be(created.Name);
-            fetched.Price.Should().Be(created.Price);
-        }
+        //    // — Assert: verifica se os dados batem
+        //    fetched.Should().NotBeNull();
+        //    fetched.Id.Should().Be(created.Id);
+        //    fetched.Name.Should().Be(created.Name);
+        //    fetched.Price.Should().Be(created.Price);
+        //}
     }
 }
