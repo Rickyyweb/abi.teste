@@ -2,9 +2,9 @@
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 {
-    public class UpdateSaleValidator : AbstractValidator<UpdateSaleCommand>
+    public class UpdateSaleCommandValidator : AbstractValidator<UpdateSaleCommand>
     {
-        public UpdateSaleValidator()
+        public UpdateSaleCommandValidator()
         {
             RuleFor(x => x.SaleId)
                 .NotEmpty().WithMessage("SaleId é obrigatório.");

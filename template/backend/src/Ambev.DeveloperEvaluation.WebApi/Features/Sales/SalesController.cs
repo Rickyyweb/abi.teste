@@ -138,21 +138,32 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteSale([FromRoute] Guid id, CancellationToken cancellationToken)
         {
-            var request = new DeleteSaleRequest { SaleId = id };
-            var validator = new DeleteSaleRequestValidator();
-            var validationResult = await validator.ValidateAsync(request, cancellationToken);
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.Errors);
-
-            var command = _mapper.Map<DeleteSaleCommand>(request.SaleId);
-            var result = await _mediator.Send(command, cancellationToken);
-
-            return Ok(new ApiResponseWithData<DeleteSaleResponse>
+            try
             {
-                Success = true,
-                Message = "Venda removida com sucesso",
-                Data = _mapper.Map<DeleteSaleResponse>(result)
-            });
+                var request = new DeleteSaleRequest { SaleId = id };
+                var validator = new DeleteSaleRequestValidator();
+                var validationResult = await validator.ValidateAsync(request, cancellationToken);
+                if (!validationResult.IsValid)
+                    return BadRequest(validationResult.Errors);
+
+                var command = _mapper.Map<DeleteSaleCommand>(request.SaleId);
+                var result = await _mediator.Send(command, cancellationToken);
+
+                return Ok(new ApiResponseWithData<DeleteSaleResponse>
+                {
+                    Success = true,
+                    Message = "Venda removida com sucesso",
+                    Data = _mapper.Map<DeleteSaleResponse>(result)
+                });
+            }
+            catch (KeyNotFoundException knf)
+            {
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = knf.Message
+                });
+            }
         }
     }
 }

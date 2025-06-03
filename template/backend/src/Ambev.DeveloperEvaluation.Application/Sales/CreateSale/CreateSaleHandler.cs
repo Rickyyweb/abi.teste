@@ -1,10 +1,13 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Application.Users.CreateUser;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events.Sale;
 using Ambev.DeveloperEvaluation.ORM.Persistence;
 using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 {
@@ -27,12 +30,19 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
             _logger = logger;
         }
 
-        public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken ct)
+        public async Task<CreateSaleResult> Handle(CreateSaleCommand command, CancellationToken cancellationToken)
         {
+
+            var validator = new CreateSaleCommandValidator();
+            var validationResult = await validator.ValidateAsync(command, cancellationToken);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             // 1) Se já existe a chave de idempotência, retorna o resultado mapeado (sem recriar a sale)
             var existingKey = await _db.IdempotencyKeys
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Key == command.IdempotencyKey, ct);
+                .FirstOrDefaultAsync(x => x.Key == command.IdempotencyKey, cancellationToken);
 
             if (existingKey != null)
             {
@@ -43,7 +53,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
                 var existingSale = await _db.Sales
                 .Include(s => s.Items)
                     .ThenInclude(i => i.Product)  
-                .FirstOrDefaultAsync(s => s.Id == existingKey.SaleId, ct);
+                .FirstOrDefaultAsync(s => s.Id == existingKey.SaleId, cancellationToken);
 
                 return _mapper.Map<CreateSaleResult>(existingSale);
             }
@@ -60,7 +70,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
                 // Para cada item, busca o produto e obtém o preço
                 var product = await _db.Products
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == dto.ProductId, ct);
+                    .FirstOrDefaultAsync(p => p.Id == dto.ProductId, cancellationToken);
 
                 if (product == null)
                 {
@@ -78,10 +88,10 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
             }
 
             // 3) Persiste Sale e registra a chave de idempotência
-            await using var tx = await _db.Database.BeginTransactionAsync(ct);
+            await using var tx = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             _db.Sales.Add(sale);
-            await _db.SaveChangesAsync(ct);
+            await _db.SaveChangesAsync(cancellationToken);
 
             var keyEntry = new IdempotencyKeyEntry
             {
@@ -89,15 +99,15 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
                 SaleId = sale.Id
             };
             _db.IdempotencyKeys.Add(keyEntry);
-            await _db.SaveChangesAsync(ct);
+            await _db.SaveChangesAsync(cancellationToken);
 
-            await tx.CommitAsync(ct);
+            await tx.CommitAsync(cancellationToken);
 
             _logger.LogInformation(
                 "Venda persistida no banco (idempotente). SaleId={SaleId}, Subtotal={Subtotal}, Discount={Discount}, TotalAmount={TotalAmount}",
                 sale.Id, sale.Subtotal, sale.Discount, sale.TotalAmount);
 
-            await _mediator.Publish(new SaleCreatedEvent(sale.Id), ct);
+            await _mediator.Publish(new SaleCreatedEvent(sale.Id), cancellationToken);
             _logger.LogInformation("SaleCreatedEvent publicado. SaleId={SaleId}", sale.Id);
 
             return _mapper.Map<CreateSaleResult>(sale);

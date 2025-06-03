@@ -5,9 +5,9 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
     /// <summary>
     /// Validator para CreateSaleCommand.
     /// </summary>
-    public class CreateSaleValidator : AbstractValidator<CreateSaleCommand>
+    public class CreateSaleCommandValidator : AbstractValidator<CreateSaleCommand>
     {
-        public CreateSaleValidator()
+        public CreateSaleCommandValidator()
         {
             RuleFor(x => x.CustomerId)
                 .NotEmpty().WithMessage("CustomerId é obrigatório.");

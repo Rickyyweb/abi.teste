@@ -2,9 +2,9 @@
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale
 {
-    public class DeleteSaleValidator : AbstractValidator<DeleteSaleCommand>
+    public class DeleteSaleCommandValidator : AbstractValidator<DeleteSaleCommand>
     {
-        public DeleteSaleValidator()
+        public DeleteSaleCommandValidator()
         {
             RuleFor(x => x.SaleId)
                 .NotEmpty().WithMessage("SaleId é obrigatório.");

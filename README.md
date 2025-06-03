@@ -39,40 +39,30 @@ Antes de executar a aplicação via Docker, verifique se você possui instalado 
 Ambev.DeveloperEvaluation
 ├── Adapters
 │   └── Driven
-│       └── Infrastructure
-│           └── Ambev.DeveloperEvaluation.ORM
-├── Drivers
+│   ├    └── Infrastructure
+│   │        └── Ambev.DeveloperEvaluation.ORM              # Persistence (EF Core + PostgreSQL)
+├   └Drivers
 │   └── WebApi
-│       └── Ambev.DeveloperEvaluation.WebApi
+│       └── Ambev.DeveloperEvaluation.WebApi               # ASP.NET Core Web API
 ├── Core
 │   ├── Application
-│   │   └── Ambev.DeveloperEvaluation.Application
+│   │   └── Ambev.DeveloperEvaluation.Application          # Handlers, Commands, Queries, Services
 │   └── Domain
-│       └── Ambev.DeveloperEvaluation.Domain
+│       └── Ambev.DeveloperEvaluation.Domain               # Entidades, Especificações, Validações, Eventos de Domínio
 ├── Crosscutting
 │   ├── Common
-│   │   └── Ambev.DeveloperEvaluation.Common
+│   │   └── Ambev.DeveloperEvaluation.Common               # Utilitários compartilhados (PaginatedList, ApiResponse, etc.)
 │   └── IoC
-│       └── Ambev.DeveloperEvaluation.IoC
-├── Solution Items
-│   └── (arquivos adicionais da solução)
+│       └── Ambev.DeveloperEvaluation.IoC                  # Configuração de DI (MediatR, AutoMapper, DbContext, etc.)
 ├── Tests
 │   ├── Functional
-│   │   └── Ambev.DeveloperEvaluation.Functional
-│   │       ├── Dependências
-│   │       ├── CustomWebApplicationFactory
-│   │       ├── Helper
-│   │       │   ├── ProjectPathHelper
-│   │       │   └── ProgramStub.cs
-│   │       ├── Products
-│   │       │   └── ProductsApiTests.cs
-│   │       └── Sales
+│   │   └── Ambev.DeveloperEvaluation.Functional           # Testes Funcionais (WebApplicationFactory, InMemory, Helpers)
 │   ├── Integration
-│   │   └── Ambev.DeveloperEvaluation.Integration
+│   │   └── Ambev.DeveloperEvaluation.Integration          # Testes de Integração (Testcontainers + PostgreSQL real)
 │   └── Unit
-│       └── Ambev.DeveloperEvaluation.Unit
-├── docker-compose.yml
-└── README.md
+│       └── Ambev.DeveloperEvaluation.Unit                 # Testes Unitários (xUnit + FluentAssertions + NSubstitute)
+├── docker-compose.yml                                      # Orquestra WebApi + PostgreSQL
+└── README.md                                               # Documentação (já comentada anteriormente)
 ```
 
 - **Adapters/Driven/Infrastructure/Ambev.DeveloperEvaluation.ORM**: Projeto de persistência usando Entity Framework Core (PostgreSQL).  

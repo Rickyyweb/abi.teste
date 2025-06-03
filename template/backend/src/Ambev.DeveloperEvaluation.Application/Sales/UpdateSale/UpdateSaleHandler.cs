@@ -1,8 +1,11 @@
-﻿using Ambev.DeveloperEvaluation.Domain.Entities;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.ORM.Persistence;
+using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
 {
@@ -22,37 +25,44 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
             _logger = logger;
         }
 
-        public async Task<UpdateSaleResult> Handle(UpdateSaleCommand request, CancellationToken cancellationToken)
+        public async Task<UpdateSaleResult> Handle(UpdateSaleCommand command, CancellationToken cancellationToken)
         {
+
+            var validator = new UpdateSaleCommandValidator();
+            var validationResult = await validator.ValidateAsync(command, cancellationToken);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var sale = await _db.Sales
                                 .Include(s => s.Items)
-                                .FirstOrDefaultAsync(s => s.Id == request.SaleId, cancellationToken);
+                                .FirstOrDefaultAsync(s => s.Id == command.SaleId, cancellationToken);
 
             if (sale == null)
-                throw new KeyNotFoundException($"Venda não encontrada: {request.SaleId}");
+                throw new KeyNotFoundException($"Venda não encontrada: {command.SaleId}");
 
             // 2) Verifica Idempotência
             var existingKey = await _db.IdempotencyKeys
                                       .AsNoTracking()
-                                      .FirstOrDefaultAsync(x => x.Key == request.IdempotencyKey, cancellationToken);
+                                      .FirstOrDefaultAsync(x => x.Key == command.IdempotencyKey, cancellationToken);
             if (existingKey != null)
             {
                 _logger.LogInformation(
                     "UpdateSaleHandler: IdempotencyKey {Key} já processada. Retornando SaleId existente {SaleId}.",
-                    request.IdempotencyKey, existingKey.SaleId);
+                    command.IdempotencyKey, existingKey.SaleId);
                 return new UpdateSaleResult(existingKey.SaleId);
             }
 
-            var grouped = request.Items
+            var grouped = command.Items
                                  .GroupBy(i => i.ProductId)
                                  .Select(g => new { ProductId = g.Key, TotalQty = g.Sum(i => i.Quantity) });
             if (grouped.Any(g => g.TotalQty > 20))
                 throw new InvalidOperationException("Limite de 20 unidades do mesmo item excedido.");
 
-            var requestProductIds = request.Items.Select(i => i.ProductId).ToHashSet();
+            var requestProductIds = command.Items.Select(i => i.ProductId).ToHashSet();
 
             // 5) Percorre cada DTO do request e atualiza ou adiciona
-            foreach (var dto in request.Items)
+            foreach (var dto in command.Items)
             {
                 // Busca preço atual do produto (não rastreado)
                 var product = await _db.Products
@@ -94,7 +104,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
             // 7) Cria registro de idempotência (ainda não salvo)
             var keyEntry = new IdempotencyKeyEntry
             {
-                Key = request.IdempotencyKey,
+                Key = command.IdempotencyKey,
                 SaleId = sale.Id
             };
             _db.IdempotencyKeys.Add(keyEntry);
@@ -105,7 +115,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
             }
             catch (DbUpdateConcurrencyException)
             {
-                throw new KeyNotFoundException($"Venda não encontrada (concorrência): {request.SaleId}");
+                throw new KeyNotFoundException($"Venda não encontrada (concorrência): {command.SaleId}");
             }
 
             return new UpdateSaleResult(sale.Id);
