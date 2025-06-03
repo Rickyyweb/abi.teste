@@ -41,7 +41,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.GetSale
 
             if (sale == null)
             {
-                _logger.LogWarning("Venda não encontrada: SaleId={SaleId}", command.Id);
+                _logger.LogInformation("Venda não encontrada: SaleId={SaleId}", command.Id);
                 throw new KeyNotFoundException($"Venda não encontrada: {command.Id}");
             }
 

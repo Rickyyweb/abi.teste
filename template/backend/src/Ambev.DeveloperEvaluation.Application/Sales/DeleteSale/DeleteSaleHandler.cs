@@ -39,7 +39,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.DeleteSale
 
             if (sale == null)
             {
-                _logger.LogWarning("Venda não encontrada para remoção: SaleId={SaleId}", command.SaleId);
+                _logger.LogInformation("Venda não encontrada para remoção: SaleId={SaleId}", command.SaleId);
                 throw new KeyNotFoundException($"Venda não encontrada: {command.SaleId}");
             }
 

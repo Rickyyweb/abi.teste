@@ -34,12 +34,17 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.UpdateSale
             if (!validationResult.IsValid)
                 throw new ValidationException(validationResult.Errors);
 
+            _logger.LogInformation("Editando venda: SaleId={SaleId}", command.SaleId);
+
             var sale = await _db.Sales
                                 .Include(s => s.Items)
                                 .FirstOrDefaultAsync(s => s.Id == command.SaleId, cancellationToken);
 
             if (sale == null)
+            {
+                _logger.LogInformation("Venda não encontrada para remoção: SaleId={SaleId}", command.SaleId);
                 throw new KeyNotFoundException($"Venda não encontrada: {command.SaleId}");
+            }
 
             // 2) Verifica Idempotência
             var existingKey = await _db.IdempotencyKeys

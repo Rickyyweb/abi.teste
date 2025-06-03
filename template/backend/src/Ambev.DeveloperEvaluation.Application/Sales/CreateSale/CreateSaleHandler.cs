@@ -74,7 +74,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 
                 if (product == null)
                 {
-                    _logger.LogWarning(
+                    _logger.LogInformation(
                         "Produto não encontrado ao criar venda (idempotente). ProductId={ProductId}",
                         dto.ProductId);
                     throw new KeyNotFoundException($"Produto não encontrado: {dto.ProductId}");
